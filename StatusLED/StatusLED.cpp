@@ -20,6 +20,15 @@ void StatusLED::setStatus(Status status) {
       case no_wifi:
         period = NO_WIFI;
         break;
+      case custom_1:
+        period = CUSTOM_1;
+        break;
+      case custom_2:
+        period = CUSTOM_2;
+        break;
+      case custom_3:
+        period = CUSTOM_3;
+        break;
      }
      if(period == 0) {
        digitalWrite(gpio, HIGH);

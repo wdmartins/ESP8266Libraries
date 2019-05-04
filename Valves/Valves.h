@@ -12,7 +12,7 @@ class Valve {
     virtual void openValve(void) = 0;
     void closeValve(void);
     bool isValveOpen();
-   
+    void resetOpenStatus(bool);
   protected:
     bool isOpen;          
 };
@@ -58,7 +58,10 @@ class SolenoidValve: public Valve {
     }
     void setSolenoidPulseLengthMiliSec(int length) {solenoidPulseLength = length;}
     int getSolenoidPulseLengthMiliSec(void) {return solenoidPulseLength;}
-    
+    void resetOpenStatus(bool open = false) {
+      isOpen = open;
+    }
+
   protected:
     int enablingPort;
     int signalPort;

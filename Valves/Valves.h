@@ -27,7 +27,7 @@ class Valve {
 class SolenoidValve: public Valve {
   private:
     const int SOLENOID_PULSE_LENGTH_MILISEC = 100;
-    const int SKIP_SYNC_INTERVAL_SECONDS = 10;
+    const int SKIP_SYNC_INTERVAL_SECONDS = 30;
 
   public:
     SolenoidValve(int enablingGpio, int signalGpio)

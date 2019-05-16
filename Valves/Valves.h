@@ -5,6 +5,8 @@
 
 #ifndef VALVES_H
 #define VALVES_H
+#include <FlowMeter.h>
+#include <Ticker.h>
 
 // Pure virtual Valve class. It can only be open or close.
 class Valve {
@@ -14,7 +16,7 @@ class Valve {
     bool isValveOpen();
     void resetOpenStatus(bool);
   protected:
-    bool isOpen;          
+    bool _isOpen;          
 };
 
 // Solenoid Valve class. Solenoid Valve abstracts H bridge that open/close the valve
@@ -25,55 +27,71 @@ class Valve {
 class SolenoidValve: public Valve {
   private:
     const int SOLENOID_PULSE_LENGTH_MILISEC = 100;
+    const int SKIP_SYNC_INTERVAL_SECONDS = 10;
+
   public:
     SolenoidValve(int enablingGpio, int signalGpio)
-    : enablingPort(enablingGpio),
-    signalPort(signalGpio),
-    solenoidPulseLength(SOLENOID_PULSE_LENGTH_MILISEC) {
-      pinMode(enablingPort, OUTPUT);
-      pinMode(signalPort, OUTPUT);
-      digitalWrite(enablingPort, LOW);
-      digitalWrite(signalPort, LOW);
-      isOpen = false;
+    : _enablingPort(enablingGpio),
+    _signalPort(signalGpio),
+    _flowMeter(nullptr),
+    _skipSyncCheck(false),
+    _solenoidPulseLength(SOLENOID_PULSE_LENGTH_MILISEC) {
+      pinMode(_enablingPort, OUTPUT);
+      digitalWrite(_enablingPort, LOW);
+      pinMode(_signalPort, OUTPUT);
+      digitalWrite(_signalPort, LOW);
+      _isOpen = false;
     }
     
     ~SolenoidValve() {};
 
-    bool isValveOpen() {return isOpen;}
+    bool isValveOpen() {return _isOpen;}
     void openValve() {
-      if (isOpen) {
+      if (_isOpen) {
         Serial.println("Valve is already open");
         return;
       }
-      activateSolenoid();
-      isOpen = true;
+      _activateSolenoid();
+      _isOpen = true;
     }
     void closeValve() {
-      if (!isOpen) {
+      if (!_isOpen) {
         Serial.println("Valve is already close");
         return;
       }
-      activateSolenoid();
-      isOpen = false;
+      _activateSolenoid();
+      _isOpen = false;
     }
-    void setSolenoidPulseLengthMiliSec(int length) {solenoidPulseLength = length;}
-    int getSolenoidPulseLengthMiliSec(void) {return solenoidPulseLength;}
+    void setSolenoidPulseLengthMiliSec(int length) {_solenoidPulseLength = length;}
+    int getSolenoidPulseLengthMiliSec(void) {return _solenoidPulseLength;}
     void resetOpenStatus(bool open = false) {
-      isOpen = open;
+      _isOpen = open;
     }
+    void setFlowMeter(FlowMeter *fm) {
+      _flowMeter = fm;
+    }
+    void run(void);
+
+  public:
+    int _skipSyncCheck;
 
   protected:
-    int enablingPort;
-    int signalPort;
-    int solenoidPulseLength;
+    int _enablingPort;
+    int _signalPort;
+    int _solenoidPulseLength;
+    Ticker _ticker;
+    FlowMeter *_flowMeter;
   
   protected:
-    void activateSolenoid() {
-      digitalWrite(signalPort, digitalRead(signalPort) == LOW ? HIGH : LOW);
-      digitalWrite(enablingPort, HIGH);
-      delay(solenoidPulseLength);
-      digitalWrite(enablingPort, LOW);
+    void _activateSolenoid() {
+      digitalWrite(_signalPort, digitalRead(_signalPort) == LOW ? HIGH : LOW);
+      digitalWrite(_enablingPort, HIGH);
+      delay(_solenoidPulseLength);
+      digitalWrite(_enablingPort, LOW);
     }
+  private:
+    friend void skipCheckTime();
+
 };
 
 #endif VALVES_H

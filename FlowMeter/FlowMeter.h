@@ -6,6 +6,9 @@
 #define FLOW_METER_H
 
 class FlowMeter {
+  public:
+    const static unsigned int MINIMUM_PULSES_BETWEEN_READ_TO_SET_FLOWING = 5;
+
   private: 
     const static unsigned int DEFAULT_FACTOR_PULSES_PER_LITER = 450;
     const static unsigned int TICKER_LENGTH_MILISEC = 500;
@@ -23,10 +26,10 @@ class FlowMeter {
     void run();
 
   protected:
-    int signalPort;
-    unsigned int pulsesPerLiter;
-    unsigned int litersCounted;
-    bool isFluidFlowing;
+    int _signalPort;
+    unsigned int _pulsesPerLiter;
+    unsigned int _litersCounted;
+    bool _isFluidFlowing;
 
   private:
     friend void countPulses(FlowMeter *);

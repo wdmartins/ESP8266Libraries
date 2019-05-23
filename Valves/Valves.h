@@ -73,7 +73,7 @@ class SolenoidValve: public Valve {
     void run(void);
 
   public:
-    int _skipSyncCheck;
+    bool _skipSyncCheck;
 
   protected:
     int _enablingPort;

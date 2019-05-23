@@ -3,7 +3,8 @@
 #include <Valves.h>
 
 void skipCheckTime(SolenoidValve *sv) {
-  sv->_skipSyncCheck = !sv->_skipSyncCheck;
+    Serial.println("skipCheckTime");
+  sv->_skipSyncCheck = !(sv->_skipSyncCheck);
 }
 
 void SolenoidValve::run() {
@@ -12,6 +13,7 @@ void SolenoidValve::run() {
         if (_isOpen != _flowMeter->isFlowing()) {
             Serial.println("Valve out of sync. Activate Valve");
             _activateSolenoid();
+            Serial.println("Valve Activated");
             _skipSyncCheck = true;
             _ticker.once(SKIP_SYNC_INTERVAL_SECONDS, skipCheckTime, this);
         }

@@ -2,7 +2,7 @@
 #include "LongTicker.h"
 
 void repeat(LongTicker *myTicker) {
-  myTicker->showStatus("Begin repeat");
+  myTicker->showStatus("repeat");
   int tickerMinutes = std::min(myTicker->getTotalMinutesLeft(), LongTicker::MAX_MINUTES_TICKER);
   if (tickerMinutes <= 0) {
     myTicker->cb();
@@ -10,13 +10,11 @@ void repeat(LongTicker *myTicker) {
     if (myTicker->getTotalMinutesLeft() > LongTicker::MAX_MINUTES_TICKER) {
       myTicker->setTotalMinutesLeft(myTicker->getTotalMinutesLeft() - tickerMinutes);
       myTicker->ticker.once(LongTicker::MAX_MINUTES_TICKER * 60, repeat, myTicker);
-      myTicker->showStatus("End repeat");
       return;
     }
     myTicker->ticker.once(myTicker->getTotalMinutesLeft() * 60, myTicker->cb);
     myTicker->setTotalMinutesLeft(0);
   }
-  myTicker->showStatus("End repeat");
 }
 
 LongTicker::LongTicker()
@@ -31,25 +29,23 @@ LongTicker::~LongTicker() {
 }
 
 void LongTicker::showStatus(const char *functionName) {
-  Serial.print("[TICKER] "); Serial.print("("); Serial.print(functionName); Serial.print(") ");
-  Serial.print(": Name: "); Serial.print(this->tickerName.c_str()); Serial.print(", minutesLeft: "); Serial.println(this->totalMinutesLeft);  
+  Serial.printf("[TICKER]: func(%s), ticker(%s), minutesLeft(%d)\n",
+    functionName, this->tickerName.c_str(), this->totalMinutesLeft);  
 }
 
 void LongTicker::once(int minutes, Ticker::callback_t cb) {
   if (ticker.active()) {
-    Serial.println("This ticker is already running. It will be detached");
+    Serial.println("T[TICKER]: his ticker is already running. It will be detached");
     ticker.detach();
   }
   this->totalMinutesLeft = minutes;
-  this->showStatus("Begin once");
+  this->showStatus("once");
   if (minutes > MAX_MINUTES_TICKER) {
     this->totalMinutesLeft = minutes - MAX_MINUTES_TICKER;
     this->cb = cb;
     ticker.once(MAX_MINUTES_TICKER * 60, repeat, this);
-    this->showStatus("End once");
     return;
   }
   ticker.once(minutes * 60, cb);
   this->totalMinutesLeft = 0;
-  this->showStatus("End once");
 }

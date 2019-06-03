@@ -20,4 +20,4 @@ class TimeUtils {
         TimeUtils() {}
 };
 
-#endif  TIME_UTILS_H
+#endif  // TIME_UTILS_H

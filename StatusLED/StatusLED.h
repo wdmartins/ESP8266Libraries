@@ -39,9 +39,9 @@ class StatusLED {
       return gpio;
     };
   private:
-    Ticker ticker;
-    Status state;
     int gpio;
+    Status state;
+    Ticker ticker;
 };
 
-#endif STATUS_LED_H
+#endif // STATUS_LED_H

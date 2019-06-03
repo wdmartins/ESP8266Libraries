@@ -90,4 +90,4 @@ class PushButton {
     time_t _pressTime;
 
 };
-#endif PUSHBUTTON_H
+#endif // PUSHBUTTON_H

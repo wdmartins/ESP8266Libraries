@@ -31,10 +31,10 @@ class SolenoidValve: public Valve {
 
   public:
     SolenoidValve(int enablingGpio, int signalGpio)
-    : _enablingPort(enablingGpio),
+    : _skipSyncCheck(false),
+    _enablingPort(enablingGpio),
     _signalPort(signalGpio),
     _flowMeter(nullptr),
-    _skipSyncCheck(false),
     _solenoidPulseLength(SOLENOID_PULSE_LENGTH_MILISEC) {
       pinMode(_enablingPort, OUTPUT);
       digitalWrite(_enablingPort, LOW);
@@ -64,9 +64,9 @@ class SolenoidValve: public Valve {
   protected:
     int _enablingPort;
     int _signalPort;
+    FlowMeter *_flowMeter;
     int _solenoidPulseLength;
     Ticker _ticker;
-    FlowMeter *_flowMeter;
   
   protected:
     void _activateSolenoid() {
@@ -80,4 +80,4 @@ class SolenoidValve: public Valve {
 
 };
 
-#endif VALVES_H
+#endif // VALVES_H

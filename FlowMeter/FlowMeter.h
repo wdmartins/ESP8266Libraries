@@ -28,11 +28,11 @@ class FlowMeter {
   protected:
     int _signalPort;
     unsigned int _pulsesPerLiter;
-    unsigned int _litersCounted;
     bool _isFluidFlowing;
+    unsigned int _litersCounted;
 
   private:
     friend void countPulses(FlowMeter *);
 };
 
-#endif FLOW_METER_H
+#endif // FLOW_METER_H

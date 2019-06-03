@@ -41,4 +41,4 @@ private:
   int totalMinutesLeft;
 };
 
-#endif LONG_TICKER_H
+#endif // LONG_TICKER_H

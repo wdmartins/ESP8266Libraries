@@ -29,6 +29,8 @@ void StatusLED::setStatus(Status status) {
       case custom_3:
         period = CUSTOM_3;
         break;
+      case unknown:
+        break;
      }
      if(period == 0) {
        digitalWrite(gpio, HIGH);

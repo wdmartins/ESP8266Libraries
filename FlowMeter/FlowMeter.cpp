@@ -36,9 +36,11 @@ void FlowMeter::restart() {
     _litersCounted = 0;
 }
 
-unsigned int FlowMeter::getCountedLiters(bool restart) { 
+unsigned int FlowMeter::getCountedLiters(bool restart) {
+    Serial.printf("[FLOWMTR]: GetCountedLiters - Total Pulses: %d\n", pulsesCounter); 
     unsigned int liters = pulsesCounter / _pulsesPerLiter;
     pulsesCounter = restart ? 0 : pulsesCounter;
+    Serial.printf("[FLOWMTR]: GetCountedLiters - Total Liters: %d\n", _litersCounted + liters); 
     return _litersCounted + liters;
 }
 

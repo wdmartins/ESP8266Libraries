@@ -10,7 +10,7 @@ class FlowMeter {
     const static unsigned int MINIMUM_PULSES_BETWEEN_READ_TO_SET_FLOWING = 5;
 
   private: 
-    const static unsigned int DEFAULT_FACTOR_PULSES_PER_LITER = 450;
+    const static unsigned int DEFAULT_FACTOR_PULSES_PER_LITER = 350;
     const static unsigned int TICKER_LENGTH_MILISEC = 500;
     const static unsigned int TRANSLATE_PULSES_TO_LITERS_AND_RESET = DEFAULT_FACTOR_PULSES_PER_LITER * 1000;
 

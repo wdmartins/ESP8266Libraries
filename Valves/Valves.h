@@ -27,7 +27,7 @@ class Valve {
 class SolenoidValve: public Valve {
   private:
     const int SOLENOID_PULSE_LENGTH_MILISEC = 100;
-    const int SKIP_SYNC_INTERVAL_SECONDS = 30;
+    const int SKIP_SYNC_INTERVAL_SECONDS = 10;
 
   public:
     SolenoidValve(int enablingGpio, int signalGpio)
@@ -46,22 +46,8 @@ class SolenoidValve: public Valve {
     ~SolenoidValve() {};
 
     bool isValveOpen() {return _isOpen;}
-    void openValve() {
-      if (_isOpen) {
-        Serial.println("Valve is already open");
-        return;
-      }
-      _activateSolenoid();
-      _isOpen = true;
-    }
-    void closeValve() {
-      if (!_isOpen) {
-        Serial.println("Valve is already close");
-        return;
-      }
-      _activateSolenoid();
-      _isOpen = false;
-    }
+    void openValve(void);
+    void closeValve(void);
     void setSolenoidPulseLengthMiliSec(int length) {_solenoidPulseLength = length;}
     int getSolenoidPulseLengthMiliSec(void) {return _solenoidPulseLength;}
     void resetOpenStatus(bool open = false) {

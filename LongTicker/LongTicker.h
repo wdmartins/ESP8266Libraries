@@ -37,8 +37,8 @@ public:
   }
 
 private:
-  std::string tickerName;
   int totalMinutesLeft;
+  std::string tickerName;
 };
 
 #endif // LONG_TICKER_H

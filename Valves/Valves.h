@@ -26,11 +26,11 @@ class Valve {
 // gate the feeds the other signal port.
 class SolenoidValve: public Valve {
   private:
-    const int SOLENOID_PULSE_LENGTH_MILISEC = 100;
-    const int SKIP_SYNC_INTERVAL_SECONDS = 10;
+    const uint8_t SOLENOID_PULSE_LENGTH_MILISEC = 100;
+    const uint8_t SKIP_SYNC_INTERVAL_SECONDS = 10;
 
   public:
-    SolenoidValve(int enablingGpio, int signalGpio)
+    SolenoidValve(uint8_t enablingGpio, uint8_t signalGpio)
     : _skipSyncCheck(false),
     _enablingPort(enablingGpio),
     _signalPort(signalGpio),
@@ -62,10 +62,10 @@ class SolenoidValve: public Valve {
     bool _skipSyncCheck;
 
   protected:
-    int _enablingPort;
-    int _signalPort;
+    uint8_t _enablingPort;
+    uint8_t _signalPort;
     FlowMeter *_flowMeter;
-    int _solenoidPulseLength;
+    uint8_t _solenoidPulseLength;
     Ticker _ticker;
   
   protected:

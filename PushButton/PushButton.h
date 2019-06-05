@@ -9,7 +9,7 @@
 
 class PushButton {
   public:
-    PushButton(int gpio, float shortPressSeconds, float longPressSeconds):
+    PushButton(uint8_t gpio, float shortPressSeconds, float longPressSeconds):
       _gpio(gpio),
       _shortPressSeconds(shortPressSeconds),
       _longPressSeconds(longPressSeconds),
@@ -42,7 +42,7 @@ class PushButton {
     }
 
     void run() {
-      int newState = digitalRead(_gpio);
+      uint8_t newState = digitalRead(_gpio);
       if (newState != _currentValue) {
         Serial.print("[PUSHBUTTON]: State change. New state: "); Serial.println(newState);
         _currentValue = newState;
@@ -50,7 +50,7 @@ class PushButton {
           _pressTime = _getCurrentTimeRaw();
         } else {
           time_t now = _getCurrentTimeRaw();
-          int timePressed = now - _pressTime;
+          uint8_t timePressed = (uint8_t) now - _pressTime;
           Serial.print("[PUSHBUTTON]: Time button was pressed: "); Serial.print(timePressed); Serial.println(" seconds");
           if (timePressed <= _shortPressSeconds) {
             Serial.println("[PUSHBUTTON]: Very Short Press");
@@ -79,10 +79,10 @@ class PushButton {
         delay(1000);
         return time(nullptr);
     }
-    int _gpio;
+    uint8_t _gpio;
     float _shortPressSeconds;
     float _longPressSeconds;
-    int _currentValue;
+    uint8_t _currentValue;
     void (*_onPressedOnStart)();
     void (*_onVeryShortPress)();
     void (*_onShortPress)();

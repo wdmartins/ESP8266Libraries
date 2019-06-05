@@ -20,7 +20,7 @@ public:
   LongTicker(std::string tickerName);
   ~LongTicker();
     
-  void once(int minutes, Ticker::callback_t cb);
+  void once(uint16_t minutes, Ticker::callback_t cb);
   void showStatus(const char *functionName);
   bool isRunning(void) {
     return ticker.active();
@@ -28,7 +28,7 @@ public:
   void detach() {
     ticker.detach();
   }
-  void setTotalMinutesLeft(int minutes) {
+  void setTotalMinutesLeft(uint16_t minutes) {
     totalMinutesLeft = minutes;
   }
 
@@ -37,7 +37,7 @@ public:
   }
 
 private:
-  int totalMinutesLeft;
+  uint16_t totalMinutesLeft;
   std::string tickerName;
 };
 

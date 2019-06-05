@@ -33,7 +33,7 @@ void LongTicker::showStatus(const char *functionName) {
     functionName, this->tickerName.c_str(), this->totalMinutesLeft);  
 }
 
-void LongTicker::once(int minutes, Ticker::callback_t cb) {
+void LongTicker::once(uint16_t minutes, Ticker::callback_t cb) {
   if (ticker.active()) {
     Serial.println("T[TICKER]: his ticker is already running. It will be detached");
     ticker.detach();

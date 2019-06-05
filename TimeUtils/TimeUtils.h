@@ -13,8 +13,8 @@ class TimeUtils {
         static struct tm *getCurrentTime();
         static std::string getTimeStr(struct tm *time);
         static std::string getTimeStr(time_t time);
-        static int minutesTillMidnight(struct tm time);
-        static int minutesTillMidnight();
+        static uint16_t minutesTillMidnight(struct tm time);
+        static uint16_t minutesTillMidnight();
 
     private:
         TimeUtils() {}

@@ -18,7 +18,7 @@ void checkFlow(FlowMeter *flowMeter) {
     lastRead = pulsesCounter;
 }
 
-FlowMeter::FlowMeter(int signalGpio, unsigned int calibrationFactor)
+FlowMeter::FlowMeter(uint8_t signalGpio, uint16_t calibrationFactor)
 : _signalPort(signalGpio),
     _pulsesPerLiter(calibrationFactor),
     _isFluidFlowing(false),
@@ -36,9 +36,9 @@ void FlowMeter::restart() {
     _litersCounted = 0;
 }
 
-unsigned int FlowMeter::getCountedLiters(bool restart) {
+uint16_t FlowMeter::getCountedLiters(bool restart) {
     Serial.printf("[FLOWMTR]: GetCountedLiters - Total Pulses: %d\n", pulsesCounter); 
-    unsigned int liters = pulsesCounter / _pulsesPerLiter;
+    uint16_t liters = pulsesCounter / _pulsesPerLiter;
     pulsesCounter = restart ? 0 : pulsesCounter;
     Serial.printf("[FLOWMTR]: GetCountedLiters - Total Liters: %d\n", _litersCounted + liters); 
     return _litersCounted + liters;

@@ -12,11 +12,11 @@ struct tm *TimeUtils::getCurrentTime() {
   return localtime(&now);
 }
 
-int TimeUtils::minutesTillMidnight(struct tm time) {
+uint16_t TimeUtils::minutesTillMidnight(struct tm time) {
   return ((23 - time.tm_hour) * 60) + (time.tm_min == 0 ? 0 : 60 - time.tm_min);
 }
 
-int TimeUtils::minutesTillMidnight() {
+uint16_t TimeUtils::minutesTillMidnight() {
     return(minutesTillMidnight(*getCurrentTime()));
 }
 

@@ -14,10 +14,11 @@ const char* ACCESS_POINT_PASS = "esp8266";
 /*------------------------------------------------------------------------------------*/
 /* GPIO Definitions                                                                   */
 /*------------------------------------------------------------------------------------*/
+const uint8_t GPIO_ANALOG_00 = 0;          // ESP8266 NodeMCU A0
 const uint8_t GPIO_UNUSED_00 = 0;          // ESP8266 NodeMCU D3
-const uint8_t GPIO_UNUSED_01 = 2;          // ESP8266 NodeMUC D4 (UART)
+const uint8_t GPIO_UNUSED_01 = 1;          // ESP8266 NodeMUC TX (UART)
 const uint8_t GPIO_UNUSED_02 = 2;          // ESP8266 NodeMUC D4 (Boot mode. Do not user for INPUT)
-const uint8_t GPIO_UNUSED_03 = 3;          // ESP8266 NodeMCU D9 (UART)
+const uint8_t GPIO_UNUSED_03 = 3;          // ESP8266 NodeMCU RX (UART)
 const uint8_t GPIO_DISPLAY_SDA = 4;        // ESP8266 NodeMCU D2 (SDA) 
 const uint8_t GPIO_DISPLAY_SCL = 5;        // ESP8266 NodeMCU D1 (SCL)
 const uint8_t GPIO_UNUSED_06 = 6;          // ESP8266 NodeMCU -+ F M

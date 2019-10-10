@@ -9,8 +9,8 @@ void skipCheckTime(SolenoidValve *sv) {
 
 void SolenoidValve::openValve() {
     if (_isOpen) {
-    Serial.println("Valve is already open");
-    return;
+        Serial.println("Valve is already open");
+        return;
     }
     _skipSyncCheck = true;
     _ticker.once(SKIP_SYNC_INTERVAL_SECONDS, skipCheckTime, this);
@@ -19,8 +19,8 @@ void SolenoidValve::openValve() {
 }
 void SolenoidValve::closeValve() {
     if (!_isOpen) {
-    Serial.println("Valve is already close");
-    return;
+        Serial.println("Valve is already close");
+        return;
     }
     _skipSyncCheck = true;
     _ticker.once(SKIP_SYNC_INTERVAL_SECONDS, skipCheckTime, this);

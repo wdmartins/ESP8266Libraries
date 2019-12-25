@@ -21,17 +21,17 @@ const uint8_t GPIO_UNUSED_02 = 2;          // ESP8266 NodeMUC D4 (Boot mode. Do 
 const uint8_t GPIO_UNUSED_03 = 3;          // ESP8266 NodeMCU RX (UART)
 const uint8_t GPIO_DISPLAY_SDA = 4;        // ESP8266 NodeMCU D2 (SDA) 
 const uint8_t GPIO_DISPLAY_SCL = 5;        // ESP8266 NodeMCU D1 (SCL)
-const uint8_t GPIO_UNUSED_06 = 6;          // ESP8266 NodeMCU -+ F M
-const uint8_t GPIO_UNUSED_07 = 7;          // ESP8266 NodeMCU  + L E
-const uint8_t GPIO_UNUSED_08 = 8;          // ESP8266 NodeMCU  + A M
-const uint8_t GPIO_UNUSED_09 = 9;          // ESP8266 NodeMCU  + S O
-const uint8_t GPIO_UNUSED_10 = 10;         // ESP8266 NodeMCU  + H R
-const uint8_t GPIO_UNUSED_11 = 11;         // ESP8266 NodeMCU -+   Y
+const uint8_t GPIO_UNUSED_06 = 6;          // ESP8266 NodeMCU     + F M
+const uint8_t GPIO_UNUSED_07 = 7;          // ESP8266 NodeMCU     + L E
+const uint8_t GPIO_UNUSED_08 = 8;          // ESP8266 NodeMCU     + A M
+const uint8_t GPIO_UNUSED_09 = 9;          // ESP8266 NodeMCU SD2 + S O
+const uint8_t GPIO_UNUSED_10 = 10;         // ESP8266 NodeMCU SD3 + H R
+const uint8_t GPIO_UNUSED_11 = 11;         // ESP8266 NodeMCU     +   Y
 const uint8_t GPIO_UNUSED_12 = 12;         // ESP8266 NodeMCU D6
 const uint8_t GPIO_UNUSED_13 = 13;         // ESP8266 NodeMUC D7
 const uint8_t GPIO_UNUSED_14 = 14;         // ESP8266 NodeMCU D5
 const uint8_t GPIO_UNUSED_15 = 15;         // ESP8266 NodeMCU D8 (Boot from SD Card)
-const uint8_t GPIO_UNUSED_16 = 16;         // ESP8266 NodeMCU D0
+const uint8_t GPIO_UNUSED_16 = 16;         // ESP8266 NodeMCU D0 (AKA LED_BUILTIN)
 
 /*------------------------------------------------------------------------------------*/
 /* Global Variables                                                                   */

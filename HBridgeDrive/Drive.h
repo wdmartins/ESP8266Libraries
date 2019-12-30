@@ -5,25 +5,27 @@
 #ifndef Drive_h
 #define Drive_h
 
-const uint8_t CALIBRATION_STEPS = 5;
-const uint8_t PULSES_PER_CALIBRATION_STEP = 200;
-const uint8_t CALIBRATION_FWD = 0;
-const uint8_t CALIBRATION_BKD = 1;
-const int CALIBRATION_SPEED = 450;
-const float MINIMUM_SPEED_FACTOR = 2; // 2% difference between right and left wheels
-const float DEFAULT_SPEED_FACTOR = 100;
+typedef enum  {
+  FORWARD,
+  BACKWARD,
+  STOP
+} MovingState;
 
 class Drive
 {
   private:
-    const uint8_t CALIBRATION_STEPS = 5;             // Number of wheel calibration steps
-    const uint8_t PULSES_PER_CALIBRATION_STEP = 200; // Pulses needed to perform calibration
-    const uint8_t CALIBRATION_FWD = 0;               // Forward speed calibration
-    const uint8_t CALIBRATION_BKD = 1;               // Backward speed calibration
-    const uint8_t PAUSE_BTW_CALIBRATION_STEPS = 250; // Miliseconds
-    const int CALIBRATION_SPEED = 250;               // Calibration speed
-    const float MINIMUM_SPEED_FACTOR = 2;            // Maximun different to considered calibrated
-    const float DEFAULT_SPEED_FACTOR = 100;          // Default calibration factor (%)
+    /* Default calibration values */
+    static const uint8_t CALIBRATION_STEPS = 3;             // Number of wheel calibration steps
+    static const uint8_t PULSES_PER_CALIBRATION_STEP = 100; // Pulses needed to perform calibration
+    static const uint8_t PAUSE_BTW_CALIBRATION_STEPS = 250; // Miliseconds
+    static const uint16_t CALIBRATION_SPEED = 250;          // Calibration speed
+    const float MINIMUM_SPEED_FACTOR = 2;                   // Maximun different to considered calibrated (%)
+    const float DEFAULT_SPEED_FACTOR = 100;                 // Default calibration factor (%)
+    static const uint16_t DEFAULT_TURN_SPEED = 250;         // Default turn speed
+    static const uint16_t MILISECONDS_PER_45_DEGREES = 200; // 45 degrees turn at CALIBRATION_SPEED
+    static const int16_t USE_CURRENT_SPEED = -1;            // Use current set speed if not specified
+  public:
+    static const uint16_t SHORT_MOVE_MS = 400;              // Short adjustment sprint time
 
   public:
     // Use this constructor when slotted wheel for calibration are not available
@@ -31,28 +33,42 @@ class Drive
     // Use this constructor when slotted wheel are furnished and calibration is needed
     Drive(int IN1, int IN2, int IN3, int IN4, int RSW, int LSW);
     // Drive car forward
-    bool moveForward(int speed);
+    bool moveForward(int16_t speed = USE_CURRENT_SPEED);
     // Drive car backward
-    bool moveBackward(int speed);
+    bool moveBackward(int16_t speed = USE_CURRENT_SPEED);
     // Turn car to the right
-    bool turnRight(int speed);
+    bool turnRight(int16_t speed = USE_CURRENT_SPEED);
+    // Turn car right to a given angle
+    void turnRightDegrees(uint16_t degrees, uint16_t speed = USE_CURRENT_SPEED);
     // Turn car to the left
-    bool turnLeft(int speed);
+    bool turnLeft(int16_t speed = USE_CURRENT_SPEED);
+    // Turn car left to a given angle
+    void turnLeftDegrees(uint16_t degrees, uint16_t speed = USE_CURRENT_SPEED);
     // Stop motors
-    bool stopMoving(void);
+    bool stopMoving(bool pause = false);
+    // Resume moving
+    void resumeMoving(void);
     // Start calibration
     bool startCalibration(bool forward = true);
     // Force stop calibration
     bool stopCalibration(void);
+    // Start turn calibration
+    void startTurnCalibration(void);
+    // Tune turn
+    void tuneTurn(uint16_t miliseconds);
     // Call in loop
     bool handleDrive(void);
     // Returns true if the calibration is in progress
     bool isCalibrating(void);
     // Report slotted wheel counter. Reset counter optionally
     void report(bool reset = false);
+    // Returns true if the car is moving
+    bool isMoving(void);
   private:
     void initL298N(int IN1, int IN2, int IN3, int IN4);
     bool calculateSpeedFactor(void);
+    // Calculates how long to turn given degrees at given speed
+    uint16_t calculateTurningTimeMS(uint16_t degrees, uint16_t speed);
     int _IN1;
     int	_IN2;
     int _IN3;
@@ -61,9 +77,13 @@ class Drive
     int _LSW;
     float _fwSpeedFactor; // How much faster the right motor should run respect of the left one
     float _bwSpeedFactor; // How much faster the right motor should run respect of the left one
+    uint16_t _milisecondsPer45Degress; // Miliseconds of turning to turn 45 degrees (1/8 of a circle)
     unsigned int _calibrationSteps;
     bool _forwardCalibration;
     bool _isCalibrating;
+    bool _isTurnCalibrating;
+    MovingState _movingState;
+    uint16_t _currentMovingSpeed;
 };
 
 #endif

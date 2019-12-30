@@ -29,6 +29,10 @@ void Drive::initL298N(int IN1, int IN2, int IN3, int IN4) {
   _IN4 = IN4;
   _fwSpeedFactor = DEFAULT_SPEED_FACTOR;
   _bwSpeedFactor = DEFAULT_SPEED_FACTOR;
+  _milisecondsPer45Degress = MILISECONDS_PER_45_DEGREES;
+  _isCalibrating = false;
+  _isTurnCalibrating = false;
+  _movingState = MovingState::STOP;
 }
 
 Drive::Drive(int IN1, int IN2, int IN3, int IN4)
@@ -127,48 +131,86 @@ bool Drive::handleDrive() {
   }
   return _isCalibrating;
 }
+void Drive::startTurnCalibration() {
+  _isTurnCalibrating = true;
+}
+
+void Drive::tuneTurn(uint16_t miliseconds) {
+  Serial.printf("[DRIVE] Tune turn at %d\n", miliseconds);
+  delay(1000);
+  turnRight(DEFAULT_TURN_SPEED);
+  delay(miliseconds);
+  _milisecondsPer45Degress = miliseconds / 2;
+  stopMoving();
+}
 
 bool Drive::isCalibrating() {
-  return _isCalibrating;
+  return _isCalibrating || _isTurnCalibrating;
 }
 
 bool Drive::stopCalibration() {
   Serial.println("[DRIVE] Stopping motors");
   _isCalibrating = false;
+  _isTurnCalibrating = false;
   stopMoving();
   return true;
 }
 
 void Drive::report(bool reset ) {
-  Serial.printf("[DRIVE] RSW= %d, LSW= %d\n", rswCounter, lswCounter);
+  Serial.printf("[DRIVE] RSW= %d, LSW= %d, FSF= %f, DSF= %f, TF= %d\n", rswCounter, lswCounter, _fwSpeedFactor, _bwSpeedFactor, _milisecondsPer45Degress);
   if (reset) {
     rswCounter = 0;
     lswCounter = 0;
   }
 }
 
-bool Drive::moveForward(int speed)
+uint16_t Drive::calculateTurningTimeMS(uint16_t degrees, uint16_t speed) {
+  return (MILISECONDS_PER_45_DEGREES * (degrees / 45) * (CALIBRATION_SPEED / speed));
+}
+
+bool Drive::moveForward(int16_t speed)
 {
+  if (speed == USE_CURRENT_SPEED) {
+    speed = _currentMovingSpeed;
+  }
   Serial.printf("[DRIVE] Move Forward at speed %d\n", speed);
   analogWrite(_IN1, (int)(speed * _fwSpeedFactor / 100));
   analogWrite(_IN2, LOW);
   analogWrite(_IN3, speed);
-  analogWrite(_IN4, LOW);  
+  analogWrite(_IN4, LOW);
+  _movingState = MovingState::FORWARD;
+  _currentMovingSpeed = speed;
   return true;
 }
 
-bool Drive::moveBackward(int speed)
+bool Drive::moveBackward(int16_t speed)
 {
+  if (speed == USE_CURRENT_SPEED) {
+    speed = _currentMovingSpeed;
+  }
   Serial.printf("[DRIVE] Move Backward at speed %d\n", speed);
   analogWrite(_IN1, LOW);
   analogWrite(_IN2, (int)(speed * _bwSpeedFactor / 100));
   analogWrite(_IN3, LOW);
   analogWrite(_IN4, speed); 
+  _movingState = MovingState::BACKWARD;
+  _currentMovingSpeed = speed;
   return true;
 }
 
-bool Drive::turnLeft(int speed)
+void Drive::resumeMoving(void) {
+  if (_movingState == MovingState::FORWARD) {
+    moveForward(_currentMovingSpeed);
+  } else if (_movingState == MovingState::BACKWARD) {
+    moveBackward(_currentMovingSpeed);
+  }
+}
+
+bool Drive::turnLeft(int16_t speed)
 {
+  if (speed == USE_CURRENT_SPEED) {
+    speed = _currentMovingSpeed;
+  }
   Serial.printf("[DRIVE] Turn left at speed %d\n", speed);
   analogWrite(_IN1, speed);
   analogWrite(_IN2, LOW);
@@ -177,8 +219,20 @@ bool Drive::turnLeft(int speed)
   return true;
 }
 
-bool Drive::turnRight(int speed)
+void Drive::turnLeftDegrees(uint16_t degrees, uint16_t speed) {
+  if (speed == USE_CURRENT_SPEED) {
+    speed = _currentMovingSpeed;
+  }
+  turnLeft(speed);
+  delay(calculateTurningTimeMS(degrees, speed));
+  resumeMoving();
+}
+
+bool Drive::turnRight(int16_t speed)
 {
+  if (speed == USE_CURRENT_SPEED) {
+    speed = _currentMovingSpeed;
+  }
   Serial.printf("[DRIVE] Turn right at speed %d\n", speed);
   analogWrite(_IN1, LOW);
   analogWrite(_IN2, (int)(speed * _fwSpeedFactor / 100));
@@ -187,12 +241,29 @@ bool Drive::turnRight(int speed)
   return true;  
 }
 
-bool Drive::stopMoving()
+void Drive::turnRightDegrees(uint16_t degrees, uint16_t speed) {
+  if (speed == USE_CURRENT_SPEED) {
+    speed = _currentMovingSpeed;
+  }
+  turnRight(speed);
+  delay(calculateTurningTimeMS(degrees, speed));
+  resumeMoving();
+}
+
+bool Drive::stopMoving(bool pause)
 {
   Serial.println("[DRIVE] Stop moving.");
   analogWrite(_IN1, LOW);
   analogWrite(_IN2, LOW);
   analogWrite(_IN3, LOW);
   analogWrite(_IN4, LOW); 
+  if (!pause) {
+    _movingState = MovingState::STOP;
+    _currentMovingSpeed = 0;
+  }
   return true;  
+}
+
+bool Drive::isMoving() {
+  return (_movingState != MovingState::STOP && _currentMovingSpeed >= 0);
 }

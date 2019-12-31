@@ -32,11 +32,8 @@ void Drive::initL298N(int IN1, int IN2, int IN3, int IN4) {
   _IN2 = IN2;
   _IN3 = IN3;
   _IN4 = IN4;
-  _fwSpeedFactor = DEFAULT_SPEED_FACTOR;
-  _bwSpeedFactor = DEFAULT_SPEED_FACTOR;
   _speedFactor = DEFAULT_SPEED_FACTOR;
   _milisecondsPer45Degress = MILISECONDS_PER_45_DEGREES;
-  _isCalibrating = false;
   _isTurnCalibrating = false;
   _movingState = MovingState::STOP;
 }
@@ -59,22 +56,6 @@ Drive::Drive(int IN1, int IN2, int IN3, int IN4, int RSW, int LSW) {
   attachInterrupt(digitalPinToInterrupt(_LSW), countLswPulses, RISING);
 }
 
-bool Drive::startCalibration(bool forward) {
-  if (_RSW == -1) {
-    Serial.println("[DRIVE] Cannot start calibration as slotted wheels are not initialized.");
-    return false;
-  }
-  Serial.printf("[DRIVE] Start Calibration in %s direction.\n", (forward ? "forward" : "backward"));
-  // Initialize control variables and pulse counters
-  _isCalibrating = true;
-  _forwardCalibration = forward;
-  rswCounter = 0;
-  lswCounter = 0;
-  _calibrationSteps = CALIBRATION_STEPS;
-  forward ? moveForward(CALIBRATION_SPEED) : moveBackward(CALIBRATION_SPEED);
-  Serial.println("[DRIVE] Starting motors calibration");
-  return true;
-}
 
 float Drive::calculateSpeedFactor(unsigned int rswc, unsigned int lswc) {
   if (rswc < PULSES_PER_CALIBRATION_STEP || lswc < PULSES_PER_CALIBRATION_STEP) {
@@ -84,52 +65,6 @@ float Drive::calculateSpeedFactor(unsigned int rswc, unsigned int lswc) {
   return 100 * lswc / rswc;
 }
 
-// Deprecate
-bool Drive::calculateSpeedFactor() {
-  Serial.printf("[DRIVE] 1. CS: %d, LSW= %d, RSW= %d, SF= %f\n", _calibrationSteps, lswCounter, rswCounter, (_forwardCalibration ? _fwSpeedFactor : _bwSpeedFactor));
-  if (lswCounter == 0 || rswCounter == 0) {
-    // Pulses are not being count. Cannot perform calibration
-    Serial.printf("[DRIVE] Cannot perform calibration: LSW= %d, RSW= %d\n", lswCounter, rswCounter);
-    return true;
-  }
-  // The speed factor is greater than 1 when left wheel is faster than right wheel
-  if (_calibrationSteps == CALIBRATION_STEPS) {
-    // First calibration step. Calculate calibration factor as percentage
-    if (_forwardCalibration) {
-      _fwSpeedFactor = 100 * lswCounter / rswCounter;
-    } else {
-      _bwSpeedFactor = 100 * lswCounter / rswCounter;
-    }
-  } else {
-    // Subsequent calibration steps. 
-    float lSpeedFactor = 100 * lswCounter / rswCounter;
-    // Keep adjusting
-    Serial.printf("[DRIVE] Adjust speed factor: previous= %f, new= %f\n", (_forwardCalibration ? _fwSpeedFactor : _bwSpeedFactor), lSpeedFactor);
-    if (_forwardCalibration) {
-      _fwSpeedFactor = _fwSpeedFactor * lSpeedFactor / 100;
-    } else {
-      _bwSpeedFactor = _bwSpeedFactor * lSpeedFactor / 100;
-    }
-  }
-  stopMoving();
-  delay(PAUSE_BTW_CALIBRATION_STEPS);
-  _forwardCalibration ? moveForward(CALIBRATION_SPEED) : moveBackward(CALIBRATION_SPEED);
-
-  // Report values
-  Serial.printf("[DRIVE] 2. CS: %d, LSW= %d, RSW= %d, SF= %f\n", _calibrationSteps, lswCounter, rswCounter, (_forwardCalibration ? _fwSpeedFactor : _bwSpeedFactor));
-
-  // Decrement calibration tries
-  _calibrationSteps--;
-
-  // Reset pulse counters
-  lswCounter = 0;
-  rswCounter = 0;
-
-  // Return true if calibration is done.
-  bool goodEnoughCalibration = abs((_forwardCalibration ? _fwSpeedFactor : _bwSpeedFactor)) <= MINIMUM_SPEED_FACTOR;
-  bool tryEnoughCalibration = _calibrationSteps <= 0;
-  return goodEnoughCalibration || tryEnoughCalibration;
-}
 
 bool Drive::handleDrive() {
   if (_movingState == MovingState::FORWARD || _movingState == MovingState::BACKWARD) {
@@ -138,28 +73,9 @@ bool Drive::handleDrive() {
       _speedFactor = speedFactor;
     }
   }
-
-  // Deprecate
-  if (_isCalibrating) {
-    // More calibration steps remaining
-    if (_calibrationSteps > 0) {
-      // Check if we have enough pulses to perform calibration
-      if (lswCounter >= PULSES_PER_CALIBRATION_STEP) {
-        // Recalculate Speed Factor
-        if (calculateSpeedFactor()) {
-          if (_forwardCalibration) {
-            startCalibration(false);
-          } else {
-            // Calibration ended
-            Serial.println("[DRIVE] Calibration Ended");
-            stopCalibration();
-          }
-        }
-      }
-    }
-  }
-  return _isCalibrating;
+  return true;
 }
+
 void Drive::startTurnCalibration() {
   _isTurnCalibrating = true;
 }
@@ -174,27 +90,25 @@ void Drive::tuneTurn(uint16_t miliseconds) {
 }
 
 bool Drive::isCalibrating() {
-  return _isCalibrating || _isTurnCalibrating;
+  return _isTurnCalibrating;
 }
 
 bool Drive::stopCalibration() {
   Serial.println("[DRIVE] Stopping motors");
-  _isCalibrating = false;
   _isTurnCalibrating = false;
   stopMoving();
   return true;
 }
 
 void Drive::report(bool reset ) {
-  Serial.printf("[DRIVE] RSW= %d, LSW= %d, FSF= %f, DSF= %f, TF= %d\n", rswCounter, lswCounter, _fwSpeedFactor, _bwSpeedFactor, _milisecondsPer45Degress);
+  Serial.printf("[DRIVE] RSW= %d, LSW= %d, SF= %f, TF= %d\n", rswCounter, lswCounter, _speedFactor, _milisecondsPer45Degress);
   if (reset) {
-    rswCounter = 0;
-    lswCounter = 0;
+    resetSwCounters();
   }
 }
 
 uint16_t Drive::calculateTurningTimeMS(uint16_t degrees, uint16_t speed) {
-  return (MILISECONDS_PER_45_DEGREES * (degrees / 45) * (CALIBRATION_SPEED / speed));
+  return (MILISECONDS_PER_45_DEGREES * (degrees / 45) * (DEFAULT_SPEED / speed));
 }
 
 bool Drive::moveForward(int16_t speed)
@@ -203,7 +117,6 @@ bool Drive::moveForward(int16_t speed)
     speed = _currentMovingSpeed;
   }
   Serial.printf("[DRIVE] Move Forward at speed %d\n", speed);
-//Deprecate  analogWrite(_IN1, (int)(speed * _fwSpeedFactor / 100));
   analogWrite(_IN1, (int)(speed * _speedFactor / 100));
   analogWrite(_IN2, LOW);
   analogWrite(_IN3, speed);
@@ -220,7 +133,6 @@ bool Drive::moveBackward(int16_t speed)
   }
   Serial.printf("[DRIVE] Move Backward at speed %d\n", speed);
   analogWrite(_IN1, LOW);
-//Depreace  analogWrite(_IN2, (int)(speed * _bwSpeedFactor / 100));
   analogWrite(_IN2, (int)(speed * _speedFactor / 100));
   analogWrite(_IN3, LOW);
   analogWrite(_IN4, speed); 
@@ -248,7 +160,6 @@ bool Drive::turnLeft(int16_t speed)
   analogWrite(_IN1, speed);
   analogWrite(_IN2, LOW);
   analogWrite(_IN3, LOW);
-//Deprecate  analogWrite(_IN4, (int)(speed * _bwSpeedFactor / 100));
   analogWrite(_IN4, (int)(speed * _speedFactor / 100));
   return true;
 }
@@ -269,7 +180,6 @@ bool Drive::turnRight(int16_t speed)
   }
   Serial.printf("[DRIVE] Turn right at speed %d\n", speed);
   analogWrite(_IN1, LOW);
-//Deprecate  analogWrite(_IN2, (int)(speed * _fwSpeedFactor / 100));
   analogWrite(_IN2, (int)(speed * _speedFactor / 100));
   analogWrite(_IN3, speed);
   analogWrite(_IN4, LOW);

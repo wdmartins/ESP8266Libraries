@@ -15,10 +15,8 @@ class Drive
 {
   private:
     /* Default calibration values */
-    static const uint8_t CALIBRATION_STEPS = 3;             // Number of wheel calibration steps
     static const uint8_t PULSES_PER_CALIBRATION_STEP = 100; // Pulses needed to perform calibration
-    static const uint8_t PAUSE_BTW_CALIBRATION_STEPS = 250; // Miliseconds
-    static const uint16_t CALIBRATION_SPEED = 250;          // Calibration speed
+    static const uint16_t DEFAULT_SPEED = 250;              // Default speed
     const float MINIMUM_SPEED_FACTOR = 2;                   // Maximun different to considered calibrated (%)
     const float DEFAULT_SPEED_FACTOR = 100;                 // Default calibration factor (%)
     static const uint16_t DEFAULT_TURN_SPEED = 250;         // Default turn speed
@@ -48,14 +46,12 @@ class Drive
     bool stopMoving(bool pause = false);
     // Resume moving
     void resumeMoving(void);
-    // Start calibration
-    bool startCalibration(bool forward = true);
-    // Force stop calibration
-    bool stopCalibration(void);
     // Start turn calibration
     void startTurnCalibration(void);
     // Tune turn
     void tuneTurn(uint16_t miliseconds);
+    // Stop calibration
+    bool stopCalibration(void);
     // Call in loop
     bool handleDrive(void);
     // Returns true if the calibration is in progress
@@ -67,8 +63,6 @@ class Drive
   private:
     void initL298N(int IN1, int IN2, int IN3, int IN4);
     float calculateSpeedFactor(unsigned int rswc, unsigned int lswc);
-    // Deprecate
-    bool calculateSpeedFactor(void);
     // Calculates how long to turn given degrees at given speed
     uint16_t calculateTurningTimeMS(uint16_t degrees, uint16_t speed);
     int _IN1;
@@ -78,12 +72,7 @@ class Drive
     int _RSW;
     int _LSW;
     float _speedFactor;
-    float _fwSpeedFactor; // How much faster the right motor should run respect of the left one
-    float _bwSpeedFactor; // How much faster the right motor should run respect of the left one
     uint16_t _milisecondsPer45Degress; // Miliseconds of turning to turn 45 degrees (1/8 of a circle)
-    unsigned int _calibrationSteps;
-    bool _forwardCalibration;
-    bool _isCalibrating;
     bool _isTurnCalibrating;
     MovingState _movingState;
     uint16_t _currentMovingSpeed;

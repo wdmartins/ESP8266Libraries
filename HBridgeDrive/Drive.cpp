@@ -203,6 +203,8 @@ void Drive::resumeMoving(void) {
     moveForward(_currentMovingSpeed);
   } else if (_movingState == MovingState::BACKWARD) {
     moveBackward(_currentMovingSpeed);
+  } else {
+    stopMoving();
   }
 }
 
@@ -224,7 +226,7 @@ void Drive::turnLeftDegrees(uint16_t degrees, uint16_t speed) {
     speed = _currentMovingSpeed;
   }
   turnLeft(speed);
-  delay(calculateTurningTimeMS(degrees, speed));
+  delay(MILISECONDS_PER_45_DEGREES + calculateTurningTimeMS(degrees, speed));
   resumeMoving();
 }
 
@@ -246,7 +248,7 @@ void Drive::turnRightDegrees(uint16_t degrees, uint16_t speed) {
     speed = _currentMovingSpeed;
   }
   turnRight(speed);
-  delay(calculateTurningTimeMS(degrees, speed));
+  delay(MILISECONDS_PER_45_DEGREES + calculateTurningTimeMS(degrees, speed));
   resumeMoving();
 }
 

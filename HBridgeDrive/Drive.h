@@ -66,6 +66,8 @@ class Drive
     bool isMoving(void);
   private:
     void initL298N(int IN1, int IN2, int IN3, int IN4);
+    float calculateSpeedFactor(unsigned int rswc, unsigned int lswc);
+    // Deprecate
     bool calculateSpeedFactor(void);
     // Calculates how long to turn given degrees at given speed
     uint16_t calculateTurningTimeMS(uint16_t degrees, uint16_t speed);
@@ -75,6 +77,7 @@ class Drive
     int _IN4;
     int _RSW;
     int _LSW;
+    float _speedFactor;
     float _fwSpeedFactor; // How much faster the right motor should run respect of the left one
     float _bwSpeedFactor; // How much faster the right motor should run respect of the left one
     uint16_t _milisecondsPer45Degress; // Miliseconds of turning to turn 45 degrees (1/8 of a circle)
